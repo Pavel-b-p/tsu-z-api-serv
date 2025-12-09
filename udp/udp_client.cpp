@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define SERVER_PORT 27015
+#define SERVER_PORT 27115
 #define SERVER_IP "89.23.102.161"  // Твой серверный IP
 #define BUFFER_SIZE 512
 

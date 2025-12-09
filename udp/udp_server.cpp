@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define SERVER_PORT 27015
+#define SERVER_PORT 27115
 #define BUFFER_SIZE 512
 
 int main() {
