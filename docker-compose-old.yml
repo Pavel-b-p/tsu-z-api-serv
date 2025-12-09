@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  pc1:
+    build: .
+    container_name: pc1
+    hostname: server-pc
+    networks:
+      lab-network:
+        ipv4_address: 192.168.100.10
+    stdin_open: true
+    tty: true
+    command: bash
+
+  pc2:
+    build: .
+    container_name: pc2
+    hostname: client1-pc
+    networks:
+      lab-network:
+        ipv4_address: 192.168.100.20
+    stdin_open: true
+    tty: true
+    command: bash
+
+  pc3:
+    build: .
+    container_name: pc3
+    hostname: client2-pc
+    networks:
+      lab-network:
+        ipv4_address: 192.168.100.30
+    stdin_open: true
+    tty: true
+    command: bash
+
+networks:
+  lab-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24

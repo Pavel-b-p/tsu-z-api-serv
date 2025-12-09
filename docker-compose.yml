@@ -8,9 +8,24 @@ services:
     networks:
       lab-network:
         ipv4_address: 192.168.100.10
+    # Права для сетевых операций
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    # Сетевые настройки для multicast
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.conf.default.rp_filter=0
+      - net.ipv4.conf.all.forwarding=1
     stdin_open: true
     tty: true
-    command: bash
+    command: >
+      sh -c "echo 'PC1 (192.168.100.10) готов' && 
+             echo 'Запуск: ./udp/udp_server' &&
+             echo '       ./broadcast/broadcast_server' &&
+             echo '       ./multicast/multicast_server' &&
+             bash"
 
   pc2:
     build: .
@@ -19,9 +34,21 @@ services:
     networks:
       lab-network:
         ipv4_address: 192.168.100.20
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.conf.default.rp_filter=0
     stdin_open: true
     tty: true
-    command: bash
+    command: >
+      sh -c "echo 'PC2 (192.168.100.20) готов' && 
+             echo 'Запуск: ./udp/udp_client 192.168.100.10' &&
+             echo '       ./broadcast/broadcast_client' &&
+             echo '       ./multicast/multicast_client' &&
+             bash"
 
   pc3:
     build: .
@@ -30,13 +57,30 @@ services:
     networks:
       lab-network:
         ipv4_address: 192.168.100.30
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.conf.default.rp_filter=0
     stdin_open: true
     tty: true
-    command: bash
+    command: >
+      sh -c "echo 'PC3 (192.168.100.30) готов' && 
+             echo 'Запуск: ./udp/udp_server (порт 27116)' &&
+             echo '       ./broadcast/broadcast_server' &&
+             echo '       ./multicast/multicast_server' &&
+             bash"
 
 networks:
   lab-network:
     driver: bridge
+    # КРИТИЧНО для multicast!
+    driver_opts:
+      com.docker.network.bridge.enable_ip_md5: "true"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.mtu: "1500"
     ipam:
       config:
         - subnet: 192.168.100.0/24

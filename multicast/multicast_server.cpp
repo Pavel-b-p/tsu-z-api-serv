@@ -1,24 +1,23 @@
 #include <iostream>
 #include <cstring>
-#include <vector>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-#define START_PORT 28000  
-#define MAX_PORT_ATTEMPTS 10
+#define MULTICAST_PORT 28000
+#define MULTICAST_GROUP "239.255.0.1"  // Multicast группа
 #define BUFFER_SIZE 512
 
 int main() {
-    std::cout << "=== Multicast Server (Local Emulation) ===\n";
-    std::cout << "Emulating multicast subscription\n\n";
+    std::cout << "=== Multicast Server ===\n";
+    std::cout << "Joining multicast group: " << MULTICAST_GROUP << ":" << MULTICAST_PORT << "\n\n";
     
     int sock;
     char buffer[BUFFER_SIZE];
-    struct sockaddr_in serverAddr, clientAddr;
-    socklen_t clientLen = sizeof(clientAddr);
-    
-    int currentPort = START_PORT;
-    bool portBound = false;
+    struct sockaddr_in addr;
+    struct ip_mreq mreq;
+    socklen_t addrlen = sizeof(addr);
     
     // 1. Создание UDP сокета
     sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -27,52 +26,65 @@ int main() {
         return 1;
     }
     
-    // 2. Пытаемся привязаться к порту
-    for (int attempt = 0; attempt < MAX_PORT_ATTEMPTS; attempt++) {
-        memset(&serverAddr, 0, sizeof(serverAddr));
-        serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(currentPort);
-        serverAddr.sin_addr.s_addr = INADDR_ANY;
-        
-        std::cout << "Trying port " << currentPort << "... ";
-        
-        if (bind(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == 0) {
-            portBound = true;
-            std::cout << "SUCCESS!\n";
-            break;
-        } else {
-            std::cout << "busy\n";
-            currentPort++;
-        }
-    }
-    
-    if (!portBound) {
-        std::cerr << "ERROR: No free ports\n";
+    // 2. Разрешаем повторное использование порта
+    int reuse = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+        perror("setsockopt SO_REUSEADDR failed");
         close(sock);
         return 1;
     }
     
-    std::cout << "\n📡 Server subscribed to 'multicast group' (port " << currentPort << ")\n";
+    // 3. Настройка адреса для приема
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(MULTICAST_PORT);
+    addr.sin_addr.s_addr = INADDR_ANY;  // Принимаем со всех интерфейсов
+    
+    // 4. Привязка сокета
+    if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        perror("bind failed");
+        close(sock);
+        return 1;
+    }
+    
+    // 5. ПОДПИСКА НА MULTICAST ГРУППУ
+    mreq.imr_multiaddr.s_addr = inet_addr(MULTICAST_GROUP);
+    mreq.imr_interface.s_addr = INADDR_ANY;  // На всех интерфейсах
+    
+    if (setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+        perror("setsockopt IP_ADD_MEMBERSHIP failed");
+        close(sock);
+        return 1;
+    }
+    
+    std::cout << "✅ Successfully joined multicast group\n";
     std::cout << "Waiting for multicast messages...\n";
     std::cout << "Press Ctrl+C to stop...\n\n";
     
-    // 3. Основной цикл
+    // 6. Основной цикл приема
     while (true) {
         memset(buffer, 0, BUFFER_SIZE);
         
         int bytesReceived = recvfrom(sock, buffer, BUFFER_SIZE - 1, 0,
-                                   (struct sockaddr*)&clientAddr, &clientLen);
+                                   (struct sockaddr*)&addr, &addrlen);
         
         if (bytesReceived > 0) {
             buffer[bytesReceived] = '\0';
-            char clientIP[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
+            char senderIP[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &addr.sin_addr, senderIP, INET_ADDRSTRLEN);
             
-            std::cout << "[" << currentPort << "] Multicast received: "
-                     << buffer << " (" << bytesReceived << " bytes)\n";
+            // Проверяем, что это действительно multicast
+            unsigned long addr_num = ntohl(addr.sin_addr.s_addr);
+            bool is_multicast = (addr_num >= 0xE0000000 && addr_num <= 0xEFFFFFFF);
+            
+            std::cout << (is_multicast ? "[MULTICAST]" : "[UNICAST]");
+            std::cout << " From " << senderIP << ":" << ntohs(addr.sin_port);
+            std::cout << " > " << buffer << " (" << bytesReceived << " bytes)\n";
         }
     }
     
+    // Отписка от группы (никогда не выполнится из-за бесконечного цикла)
+    setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq));
     close(sock);
     return 0;
 }

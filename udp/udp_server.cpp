@@ -54,10 +54,7 @@ int main() {
         
         std::cout << "Received from " << clientIP << ":" << ntohs(clientAddr.sin_port)
                   << ": " << buffer << "\n";
-        
-        // ОПЦИОНАЛЬНО: отправляем echo (можно убрать, если не нужно)
-        sendto(sock, buffer, bytesReceived, 0,
-               (struct sockaddr*)&clientAddr, clientLen);
+
     }
     
     close(sock);

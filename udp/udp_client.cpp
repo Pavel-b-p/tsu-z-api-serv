@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 
 #define SERVER_PORT 27115
-#define SERVER_IP "89.23.102.161"  // Твой серверный IP
+#define SERVER_IP "192.168.100.10"  // PC1 (сервер) в Docker сети
 #define BUFFER_SIZE 512
 
 int main() {
