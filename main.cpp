@@ -27,32 +27,32 @@ int main(int argc, char* argv[]) {
             
         case 1:
             std::cout << "Запуск UDP сервера...\n";
-            system("./udp_server");
+            system("./udp/udp_server");
             break;
             
         case 2:
             std::cout << "Запуск UDP клиента...\n";
-            system("./udp_client");
+            system("./udp/udp_client");
             break;
             
         case 3:
             std::cout << "Запуск Broadcast сервера...\n";
-            system("./broadcast_server");
+            system("./broadcast/broadcast_server");
             break;
             
         case 4:
             std::cout << "Запуск Broadcast клиента...\n";
-            system("./broadcast_client");
+            system("./broadcast/broadcast_client");
             break;
             
         case 5:
             std::cout << "Запуск Multicast сервера...\n";
-            system("./multicast_server");
+            system("./multicast/multicast_server");
             break;
             
         case 6:
             std::cout << "Запуск Multicast клиента...\n";
-            system("./multicast_client");
+            system("./multicast/multicast_client");
             break;
             
         default:
