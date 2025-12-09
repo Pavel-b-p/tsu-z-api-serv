@@ -1,0 +1,45 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Главное меню (точка входа)
+  menu:
+    build: .
+    container_name: network-menu
+    network_mode: "host"  # Используем сеть хоста для реального broadcast
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/app  # Монтируем для разработки
+    command: ./main
+
+  # Тестовая сеть с несколькими контейнерами
+  broadcast-test:
+    build: .
+    networks:
+      broadcast-net:
+        ipv4_address: 192.168.100.10
+    command: sleep infinity
+
+  broadcast-client1:
+    build: .
+    networks:
+      broadcast-net:
+        ipv4_address: 192.168.100.20
+    command: sleep infinity
+
+  broadcast-client2:
+    build: .
+    networks:
+      broadcast-net:
+        ipv4_address: 192.168.100.30
+    command: sleep infinity
+
+# Создаем сеть для тестирования
+networks:
+  broadcast-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+          gateway: 192.168.100.1
