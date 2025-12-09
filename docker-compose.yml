@@ -76,7 +76,6 @@ services:
 networks:
   lab-network:
     driver: bridge
-    external: true
     # КРИТИЧНО для multicast!
     driver_opts:
       com.docker.network.bridge.enable_ip_md5: "true"
