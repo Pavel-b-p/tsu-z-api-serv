@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define DEFAULT_PORT 27015
+#define SERVER_PORT 27015
 #define BUFFER_SIZE 512
 
 int main() {
@@ -22,7 +22,7 @@ int main() {
     // 2. Настройка адреса сервера
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(DEFAULT_PORT);
+    serverAddr.sin_port = htons(SERVER_PORT);
     serverAddr.sin_addr.s_addr = INADDR_ANY;  // Слушаем на всех интерфейсах
     
     // 3. Привязка сокета к порту
@@ -32,10 +32,10 @@ int main() {
         return 1;
     }
     
-    std::cout << "UDP Server started on port " << DEFAULT_PORT << " (Echo mode)\n";
-    std::cout << "Press Ctrl+C to stop...\n";
+    std::cout << "UDP Server listening on port " << SERVER_PORT << "\n";
+    std::cout << "Press Ctrl+C to stop (will quit with error)\n";
     
-    // 4. Основной цикл приема и отправки ECHO
+    // 4. Основной цикл приема
     while (true) {
         memset(buffer, 0, BUFFER_SIZE);
         
@@ -52,9 +52,10 @@ int main() {
         char clientIP[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
         
-        std::cout << "Received from " << clientIP << ": " << buffer << "\n";
+        std::cout << "Received from " << clientIP << ":" << ntohs(clientAddr.sin_port)
+                  << ": " << buffer << "\n";
         
-        // Отправка ECHO-ответа обратно клиенту
+        // ОПЦИОНАЛЬНО: отправляем echo (можно убрать, если не нужно)
         sendto(sock, buffer, bytesReceived, 0,
                (struct sockaddr*)&clientAddr, clientLen);
     }

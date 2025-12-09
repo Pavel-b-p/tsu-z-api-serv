@@ -3,13 +3,12 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define DEFAULT_PORT 27015
+#define SERVER_PORT 27015
+#define SERVER_IP "89.23.102.161"  // Твой серверный IP
 #define BUFFER_SIZE 512
-#define SERVER_IP "127.0.0.1"  // Локальный хост
 
 int main() {
     int sock;
-    char buffer[BUFFER_SIZE];
     struct sockaddr_in serverAddr;
     
     // 1. Создание UDP сокета
@@ -22,30 +21,26 @@ int main() {
     // 2. Настройка адреса сервера
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(DEFAULT_PORT);
-    inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr);
+    serverAddr.sin_port = htons(SERVER_PORT);
+    
+    // Используем твой реальный IP
+    if (inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr) <= 0) {
+        std::cerr << "Invalid IP address: " << SERVER_IP << std::endl;
+        close(sock);
+        return 1;
+    }
     
     // 3. Сообщение для отправки
-    const char* message = "Hello from UDP client!";
-    std::cout << "Sending: " << message << "\n";
+    const char* message = "Hello UDP Server!";
     
-    // 4. Отправка сообщения на сервер
+    // 4. ОТПРАВЛЯЕМ И ЗАБЫВАЕМ - ЭТО UDP, БЛЯДЬ!
+    std::cout << "Sending UDP datagram to " << SERVER_IP << ":" << SERVER_PORT << "\n";
+    std::cout << "Message: " << message << "\n";
+    
     sendto(sock, message, strlen(message), 0,
            (struct sockaddr*)&serverAddr, sizeof(serverAddr));
     
-    // 5. Ожидание ECHO-ответа
-    std::cout << "Waiting for echo response...\n";
-    
-    socklen_t serverLen = sizeof(serverAddr);
-    int bytesReceived = recvfrom(sock, buffer, BUFFER_SIZE - 1, 0,
-                                (struct sockaddr*)&serverAddr, &serverLen);
-    
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0';
-        std::cout << "Received from server: " << buffer << "\n";
-    } else {
-        std::cout << "No response received\n";
-    }
+    std::cout << "Datagram sent. No response expected (UDP is connectionless).\n";
     
     close(sock);
     return 0;

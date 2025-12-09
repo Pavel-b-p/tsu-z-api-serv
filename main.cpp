@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <string>
 
-int main(int argc, char* argv[]) {
+int main() {
     std::cout << "=== Сетевое программирование: UDP/Broadcast/Multicast ===\n";
     std::cout << "Выберите программу для запуска:\n";
     std::cout << "1. Обычный UDP сервер (Echo)\n";
