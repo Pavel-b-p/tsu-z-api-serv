@@ -3,8 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define START_PORT 27015
-#define MAX_PORT_ATTEMPTS 10  // Пробуем 10 портов
+#define BROADCAST_PORT 27015  // Тот же порт, что у клиента
 #define BUFFER_SIZE 512
 
 int main() {
@@ -13,9 +12,6 @@ int main() {
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t clientLen = sizeof(clientAddr);
     
-    int currentPort = START_PORT;
-    bool portBound = false;
-    
     // 1. Создание UDP сокета
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -23,40 +19,28 @@ int main() {
         return 1;
     }
     
-    // 2. УБИРАЕМ SO_REUSEADDR - он позволяет нескольким процессам 
-    //    слушать один порт, что нам не нужно
+    // 2. Разрешаем повторное использование порта
+    int reuseAddr = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr));
     
-    // 3. Пытаемся привязаться к порту, начиная со START_PORT
-    for (int attempt = 0; attempt < MAX_PORT_ATTEMPTS; attempt++) {
-        memset(&serverAddr, 0, sizeof(serverAddr));
-        serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(currentPort);
-        serverAddr.sin_addr.s_addr = INADDR_ANY;
-        
-        std::cout << "Trying port " << currentPort << "... ";
-        
-        if (bind(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == 0) {
-            portBound = true;
-            std::cout << "SUCCESS!\n";
-            break;
-        } else {
-            std::cout << "busy (error: " << strerror(errno) << ")\n";
-            currentPort++;  // Пробуем следующий порт
-        }
-    }
+    // 3. Настройка адреса сервера
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(BROADCAST_PORT);  // Тот же порт 27015!
+    serverAddr.sin_addr.s_addr = INADDR_ANY;  // Слушаем на всех интерфейсах
     
-    if (!portBound) {
-        std::cerr << "ERROR: Could not bind to any port in range "
-                  << START_PORT << "-" << (START_PORT + MAX_PORT_ATTEMPTS - 1) << "\n";
+    // 4. Привязка к порту
+    if (bind(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+        perror("bind failed");
         close(sock);
         return 1;
     }
     
-    std::cout << "\n=== Broadcast Server ===\n";
-    std::cout << "Listening on port: " << currentPort << "\n";
+    std::cout << "=== Broadcast Server ===\n";
+    std::cout << "Listening for broadcast on port " << BROADCAST_PORT << "\n";
     std::cout << "Press Ctrl+C to stop...\n\n";
     
-    // 4. Основной цикл приема broadcast-сообщений
+    // 5. Основной цикл приема
     while (true) {
         memset(buffer, 0, BUFFER_SIZE);
         
@@ -68,7 +52,8 @@ int main() {
             char clientIP[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
             
-            std::cout << "[" << currentPort << "] Received from " << clientIP << ": "
+            std::cout << "Received broadcast from " << clientIP << ":" 
+                     << ntohs(clientAddr.sin_port) << " - " 
                      << buffer << " (" << bytesReceived << " bytes)\n";
         }
     }

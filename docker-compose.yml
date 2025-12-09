@@ -1,45 +1,42 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
-  # Главное меню (точка входа)
-  menu:
+  pc1:
     build: .
-    container_name: network-menu
-    network_mode: "host"  # Используем сеть хоста для реального broadcast
+    container_name: pc1
+    hostname: server-pc
+    networks:
+      lab-network:
+        ipv4_address: 192.168.100.10
     stdin_open: true
     tty: true
-    volumes:
-      - ./:/app  # Монтируем для разработки
-    command: ./main
+    command: bash
 
-  # Тестовая сеть с несколькими контейнерами
-  broadcast-test:
+  pc2:
     build: .
+    container_name: pc2
+    hostname: client1-pc
     networks:
-      broadcast-net:
-        ipv4_address: 192.168.100.10
-    command: sleep infinity
-
-  broadcast-client1:
-    build: .
-    networks:
-      broadcast-net:
+      lab-network:
         ipv4_address: 192.168.100.20
-    command: sleep infinity
+    stdin_open: true
+    tty: true
+    command: bash
 
-  broadcast-client2:
+  pc3:
     build: .
+    container_name: pc3
+    hostname: client2-pc
     networks:
-      broadcast-net:
+      lab-network:
         ipv4_address: 192.168.100.30
-    command: sleep infinity
+    stdin_open: true
+    tty: true
+    command: bash
 
-# Создаем сеть для тестирования
 networks:
-  broadcast-net:
+  lab-network:
     driver: bridge
     ipam:
       config:
         - subnet: 192.168.100.0/24
-          gateway: 192.168.100.1
