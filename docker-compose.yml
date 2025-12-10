@@ -79,7 +79,6 @@ networks:
     # КРИТИЧНО для multicast!
     driver_opts:
       com.docker.network.bridge.enable_ip_md5: "true"
-      com.docker.network.bridge.enable_icc: "true"
       com.docker.network.bridge.mtu: "1500"
     ipam:
       config:
