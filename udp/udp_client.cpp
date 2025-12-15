@@ -23,7 +23,7 @@ int main() {
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(SERVER_PORT);
     
-    // Используем твой реальный IP
+    // Используем реальный IP
     if (inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr) <= 0) {
         std::cerr << "Invalid IP address: " << SERVER_IP << std::endl;
         close(sock);
@@ -33,7 +33,7 @@ int main() {
     // 3. Сообщение для отправки
     const char* message = "Hello UDP Server!";
     
-    // 4. ОТПРАВЛЯЕМ И ЗАБЫВАЕМ - ЭТО UDP, БЛЯДЬ!
+    // 4. ОТПРАВЛЯЕМ И ЗАБЫВАЕМ - ЭТО UDP
     std::cout << "Sending UDP datagram to " << SERVER_IP << ":" << SERVER_PORT << "\n";
     std::cout << "Message: " << message << "\n";
     
