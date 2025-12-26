@@ -11,6 +11,8 @@ int main() {
     std::cout << "4. Broadcast клиент (отправка сообщений)\n";
     std::cout << "5. Multicast сервер\n";
     std::cout << "6. Multicast клиент\n";
+    std::cout << "7. TSP сервер (Time Stamp Protocol)\n";
+    std::cout << "8. TSP клиент\n";
     std::cout << "0. Выход\n";
     std::cout << "Выбор: ";
     
@@ -54,6 +56,17 @@ int main() {
             std::cout << "Запуск Multicast клиента...\n";
             system("./multicast/multicast_client");
             break;
+        
+        case 7:
+            std::cout << "Запуск TSP сервера...\n";
+            system("./tsp/tsp_server");
+            break;
+    
+        case 8:
+            std::cout << "Запуск TSP клиента...\n";
+            system("./tsp/tsp_client");
+            break;
+
             
         default:
             std::cout << "Неверный выбор!\n";

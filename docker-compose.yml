@@ -22,10 +22,11 @@ services:
     tty: true
     command: >
       sh -c "echo 'PC1 (192.168.100.10) готов' && 
-             echo 'Запуск: ./udp/udp_server' &&
-             echo '       ./broadcast/broadcast_server' &&
-             echo '       ./multicast/multicast_server' &&
-             bash"
+            echo 'Запуск: ./udp/udp_server' &&
+            echo '       ./broadcast/broadcast_server' &&
+            echo '       ./multicast/multicast_server' &&
+            echo '       ./tsp/tsp_server' &&
+            bash"
 
   pc2:
     build: .
@@ -45,10 +46,11 @@ services:
     tty: true
     command: >
       sh -c "echo 'PC2 (192.168.100.20) готов' && 
-             echo 'Запуск: ./udp/udp_client 192.168.100.10' &&
-             echo '       ./broadcast/broadcast_client' &&
-             echo '       ./multicast/multicast_client' &&
-             bash"
+              echo 'Запуск: ./udp/udp_client 192.168.100.10' &&
+              echo '       ./broadcast/broadcast_client' &&
+              echo '       ./multicast/multicast_client' &&
+              echo '       ./tsp/tsp_client 192.168.100.10' &&
+              bash"
 
   pc3:
     build: .
@@ -68,10 +70,11 @@ services:
     tty: true
     command: >
       sh -c "echo 'PC3 (192.168.100.30) готов' && 
-             echo 'Запуск: ./udp/udp_server (порт 27116)' &&
-             echo '       ./broadcast/broadcast_server' &&
-             echo '       ./multicast/multicast_server' &&
-             bash"
+            echo 'Запуск: ./udp/udp_server (порт 27116)' &&
+            echo '       ./broadcast/broadcast_server' &&
+            echo '       ./multicast/multicast_server' &&
+            echo '       ./tsp/tsp_server (порт 37001)' &&
+            bash"
 
 networks:
   lab-network:

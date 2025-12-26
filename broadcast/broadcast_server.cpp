@@ -26,7 +26,7 @@ int main() {
     // 3. Настройка адреса сервера
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(BROADCAST_PORT);  // Тот же порт 27015!
+    serverAddr.sin_port = htons(BROADCAST_PORT);  // Тот же порт
     serverAddr.sin_addr.s_addr = INADDR_ANY;  // Слушаем на всех интерфейсах
     
     // 4. Привязка к порту

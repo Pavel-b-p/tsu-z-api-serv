@@ -2,10 +2,11 @@ CC = g++
 CFLAGS = -std=c++11 -Wall -Wextra
 
 # Создаем папки если их нет
-DIRS = broadcast multicast udp
+DIRS = broadcast multicast udp tsp
 
 # Все цели
-TARGETS = main broadcast/broadcast_server broadcast/broadcast_client multicast/multicast_server multicast/multicast_client udp/udp_server udp/udp_client
+DIRS = broadcast multicast udp tsp
+TARGETS = main broadcast/broadcast_server broadcast/broadcast_client multicast/multicast_server multicast/multicast_client udp/udp_server udp/udp_client tsp/tsp_server tsp/tsp_client
 
 all: create_dirs $(TARGETS)
 
@@ -41,15 +42,25 @@ multicast/multicast_server: multicast/multicast_server.cpp
 multicast/multicast_client: multicast/multicast_client.cpp
 	$(CC) $(CFLAGS) -o multicast/multicast_client multicast/multicast_client.cpp
 
+# 7. TSP сервер
+tsp/tsp_server: tsp/tsp_server.cpp
+	$(CC) $(CFLAGS) -o tsp/tsp_server tsp/tsp_server.cpp
+
+# 8. TSP клиент
+tsp/tsp_client: tsp/tsp_client.cpp
+	$(CC) $(CFLAGS) -o tsp/tsp_client tsp/tsp_client.cpp
+
 # Очистка
 clean:
 	rm -f main
 	rm -f broadcast/broadcast_server broadcast/broadcast_client
 	rm -f multicast/multicast_server multicast/multicast_client
 	rm -f udp/udp_server udp/udp_client
+	rm -f tsp/tsp_server tsp/tsp_client
 	@if [ -d broadcast ] && [ -z "$$(ls -A broadcast)" ]; then rmdir broadcast; fi
 	@if [ -d multicast ] && [ -z "$$(ls -A multicast)" ]; then rmdir multicast; fi
 	@if [ -d udp ] && [ -z "$$(ls -A udp)" ]; then rmdir udp; fi
+	@if [ -d tsp ] && [ -z "$$(ls -A tsp)" ]; then rmdir tsp; fi
 
 # Запуск главной программы
 run: main

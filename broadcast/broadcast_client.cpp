@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define BROADCAST_PORT 27015           // ОДИН фиксированный порт
+#define BROADCAST_PORT 27015           //  фиксированный порт
 #define BROADCAST_IP "192.168.100.255"  // Broadcast адрес Docker сети
 #define BUFFER_SIZE 512
 
@@ -22,7 +22,7 @@ int main() {
         return 1;
     }
     
-    // 2. Включение режима BROADCAST (ОБЯЗАТЕЛЬНО!)
+    // 2. Включение режима BROADCAST
     int broadcastEnable = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, 
                    &broadcastEnable, sizeof(broadcastEnable)) < 0) {
@@ -48,7 +48,7 @@ int main() {
     std::cout << "Message: " << message << "\n";
     std::cout << "Sending ONE broadcast packet...\n";
     
-    // 5. Отправка ОДНОГО пакета на broadcast-адрес
+    // 5. Отправка пакета на broadcast-адрес
     int bytesSent = sendto(sock, message, strlen(message), 0,
                           (struct sockaddr*)&broadcastAddr, sizeof(broadcastAddr));
     
